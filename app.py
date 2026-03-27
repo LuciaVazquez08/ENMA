@@ -15,8 +15,8 @@ st.set_page_config(page_title="Tablero ENMA", layout="wide")
 
 @st.cache_data  
 def load_data():
-    df_2023 = pd.read_csv('data/raw/ENMA_2023.csv')
-    df_2020 = pd.read_csv('data/raw/ENMA_2020.csv')
+    df_2023 = pd.read_csv('data/raw/ENMA_2023.csv',sep=";")
+    df_2020 = pd.read_csv('data/raw/ENMA_2020.csv',sep=";")
     return df_2023, df_2020
 
 df_2020, df_2023 = load_data()
