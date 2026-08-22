@@ -1,8 +1,8 @@
 import plotly.express as px
 import streamlit as st
 
-from data_utils import get_df_filtrado, grafico_barras
-from enma_palette import CHART_SEQUENCE, FONT_BODY
+from data_utils import aplicar_tipografia, get_df_filtrado, grafico_barras
+from enma_palette import CHART_SEQUENCE
 
 NIVEL_EDUCATIVO_ORDEN = [
     "Hasta secundario incompleto",
@@ -19,48 +19,58 @@ ALTURA_CHICA = 180
 
 def _pais_por_genero(df):
     st.subheader("País de origen")
-    tabla = df.groupby(["pais_nacimiento", "genero_agrup"]).size().unstack(fill_value=0)
-    tabla = tabla.div(tabla.sum(axis=1), axis=0).mul(100).round(1)
-    tabla = tabla.loc[tabla.sum(axis=1).sort_values().index]
-    data = tabla.reset_index().melt(
-        id_vars="pais_nacimiento", var_name="Género", value_name="Porcentaje"
-    )
+    conteo = df.groupby(["pais_nacimiento", "genero_agrup"]).size().unstack(fill_value=0)
+    tabla = conteo.div(conteo.sum(axis=1), axis=0).mul(100).round(1)
+    orden_paises = tabla.sum(axis=1).sort_values().index
+    tabla = tabla.loc[orden_paises]
+    conteo = conteo.loc[orden_paises]
+    data = tabla.reset_index().melt(id_vars="pais_nacimiento", var_name="Género", value_name="Porcentaje")
+    data_cantidad = conteo.reset_index().melt(id_vars="pais_nacimiento", var_name="Género", value_name="Cantidad")
+    data = data.merge(data_cantidad, on=["pais_nacimiento", "Género"])
     fig = px.bar(
         data, x="Porcentaje", y="pais_nacimiento", color="Género",
         orientation="h", barmode="stack",
         color_discrete_sequence=CHART_SEQUENCE,
-        text="Porcentaje",
+        text="Porcentaje", custom_data=["Cantidad"],
     )
-    fig.update_traces(texttemplate="%{text}%", textposition="inside")
+    fig.update_traces(
+        texttemplate="%{text}%", textposition="inside",
+        hovertemplate="%{y}<br>Porcentaje: %{x:.1f}%<br>Personas: %{customdata[0]:,.0f}",
+    )
     fig.update_layout(
-        font_family=FONT_BODY, yaxis_title=None, xaxis_title="Porcentaje (%)",
+        yaxis_title=None, xaxis_title="Porcentaje (%)",
         margin=dict(t=10, b=10), height=ALTURA_GRANDE,
     )
+    aplicar_tipografia(fig)
     fig.update_yaxes(tickmode="linear", dtick=1, tickfont=dict(size=9))
     st.plotly_chart(fig, use_container_width=True)
 
 
-def _pertenencia_por_pais(df):
-    st.subheader("Pertenencia indígena y afrodescendencia")
-    sub = df.copy()
-    sub["Pueblos indígenas"] = sub["descendencia"] == "Descendencia Indígena"
-    sub["Afrodescendencia"] = sub["descendencia"] == "Afrodescendiente"
-    tabla = sub.groupby("pais_nacimiento")[["Pueblos indígenas", "Afrodescendencia"]].mean().mul(100).round(1)
-    tabla = tabla.loc[tabla.sum(axis=1).sort_values().index]
-    data = tabla.reset_index().melt(
-        id_vars="pais_nacimiento", var_name="Pertenencia", value_name="Porcentaje"
-    )
+def _descendencia_por_pais(df):
+    st.subheader("Descendencia")
+    conteo = df.groupby(["pais_nacimiento", "descendencia"]).size().unstack(fill_value=0)
+    tabla = conteo.div(conteo.sum(axis=1), axis=0).mul(100).round(1)
+    orden_paises = tabla.sum(axis=1).sort_values().index
+    tabla = tabla.loc[orden_paises]
+    conteo = conteo.loc[orden_paises]
+    data = tabla.reset_index().melt(id_vars="pais_nacimiento", var_name="Descendencia", value_name="Porcentaje")
+    data_cantidad = conteo.reset_index().melt(id_vars="pais_nacimiento", var_name="Descendencia", value_name="Cantidad")
+    data = data.merge(data_cantidad, on=["pais_nacimiento", "Descendencia"])
     fig = px.bar(
-        data, x="Porcentaje", y="pais_nacimiento", color="Pertenencia",
+        data, x="Porcentaje", y="pais_nacimiento", color="Descendencia",
         orientation="h", barmode="group",
         color_discrete_sequence=CHART_SEQUENCE,
-        text="Porcentaje",
+        text="Porcentaje", custom_data=["Cantidad"],
     )
-    fig.update_traces(texttemplate="%{text}%", textposition="outside")
+    fig.update_traces(
+        texttemplate="%{text}%", textposition="outside",
+        hovertemplate="%{y}<br>Porcentaje: %{x:.1f}%<br>Personas: %{customdata[0]:,.0f}",
+    )
     fig.update_layout(
-        font_family=FONT_BODY, yaxis_title=None, xaxis_title="Porcentaje (%)",
+        yaxis_title=None, xaxis_title="Porcentaje (%)",
         margin=dict(t=10, b=10), height=ALTURA_GRANDE,
     )
+    aplicar_tipografia(fig)
     fig.update_xaxes(range=[0, data["Porcentaje"].max() * 1.2])
     fig.update_yaxes(tickmode="linear", dtick=1, tickfont=dict(size=9))
     st.plotly_chart(fig, use_container_width=True)
@@ -68,21 +78,25 @@ def _pertenencia_por_pais(df):
 
 def _region_por_edad(df):
     st.subheader("Región de residencia")
-    tabla = df.groupby(["edad_agrupada", "region"]).size().unstack(fill_value=0)
-    tabla = tabla.div(tabla.sum(axis=1), axis=0).mul(100).round(1)
-    data = tabla.reset_index().melt(
-        id_vars="edad_agrupada", var_name="region", value_name="Porcentaje"
-    )
+    conteo = df.groupby(["edad_agrupada", "region"]).size().unstack(fill_value=0)
+    tabla = conteo.div(conteo.sum(axis=1), axis=0).mul(100).round(1)
+    data = tabla.reset_index().melt(id_vars="edad_agrupada", var_name="region", value_name="Porcentaje")
+    data_cantidad = conteo.reset_index().melt(id_vars="edad_agrupada", var_name="region", value_name="Cantidad")
+    data = data.merge(data_cantidad, on=["edad_agrupada", "region"])
     fig = px.bar(
         data, x="region", y="Porcentaje", color="edad_agrupada",
         barmode="group", color_discrete_sequence=CHART_SEQUENCE,
-        text="Porcentaje",
+        text="Porcentaje", custom_data=["Cantidad"],
     )
-    fig.update_traces(texttemplate="%{text}%", textposition="outside")
+    fig.update_traces(
+        texttemplate="%{text}%", textposition="outside",
+        hovertemplate="%{x}<br>Porcentaje: %{y:.1f}%<br>Personas: %{customdata[0]:,.0f}",
+    )
     fig.update_layout(
-        font_family=FONT_BODY, xaxis_title=None, yaxis_title="Porcentaje (%)",
+        xaxis_title=None, yaxis_title="Porcentaje (%)",
         legend_title="Rango etario", margin=dict(t=10, b=10), height=ALTURA_CHICA,
     )
+    aplicar_tipografia(fig)
     st.plotly_chart(fig, use_container_width=True)
 
 
@@ -96,7 +110,7 @@ def render():
     with col1:
         _pais_por_genero(df)
     with col2:
-        _pertenencia_por_pais(df)
+        _descendencia_por_pais(df)
 
     col3, col4, col5 = st.columns(3)
     with col3:
