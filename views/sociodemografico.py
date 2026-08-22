@@ -1,8 +1,8 @@
 import plotly.express as px
 import streamlit as st
 
-from data_utils import get_df_filtrado, grafico_barras
-from enma_palette import CHART_SEQUENCE, FONT_BODY
+from data_utils import aplicar_tipografia, get_df_filtrado, grafico_barras
+from enma_palette import CHART_SEQUENCE
 
 NIVEL_EDUCATIVO_ORDEN = [
     "Hasta secundario incompleto",
@@ -38,9 +38,10 @@ def _pais_por_genero(df):
         hovertemplate="%{y}<br>Porcentaje: %{x:.1f}%<br>Personas: %{customdata[0]:,.0f}",
     )
     fig.update_layout(
-        font_family=FONT_BODY, yaxis_title=None, xaxis_title="Porcentaje (%)",
+        yaxis_title=None, xaxis_title="Porcentaje (%)",
         margin=dict(t=10, b=10), height=ALTURA_GRANDE,
     )
+    aplicar_tipografia(fig)
     fig.update_yaxes(tickmode="linear", dtick=1, tickfont=dict(size=9))
     st.plotly_chart(fig, use_container_width=True)
 
@@ -70,9 +71,10 @@ def _pertenencia_por_pais(df):
         hovertemplate="%{y}<br>Porcentaje: %{x:.1f}%<br>Personas: %{customdata[0]:,.0f}",
     )
     fig.update_layout(
-        font_family=FONT_BODY, yaxis_title=None, xaxis_title="Porcentaje (%)",
+        yaxis_title=None, xaxis_title="Porcentaje (%)",
         margin=dict(t=10, b=10), height=ALTURA_GRANDE,
     )
+    aplicar_tipografia(fig)
     fig.update_xaxes(range=[0, data["Porcentaje"].max() * 1.2])
     fig.update_yaxes(tickmode="linear", dtick=1, tickfont=dict(size=9))
     st.plotly_chart(fig, use_container_width=True)
@@ -95,9 +97,10 @@ def _region_por_edad(df):
         hovertemplate="%{x}<br>Porcentaje: %{y:.1f}%<br>Personas: %{customdata[0]:,.0f}",
     )
     fig.update_layout(
-        font_family=FONT_BODY, xaxis_title=None, yaxis_title="Porcentaje (%)",
+        xaxis_title=None, yaxis_title="Porcentaje (%)",
         legend_title="Rango etario", margin=dict(t=10, b=10), height=ALTURA_CHICA,
     )
+    aplicar_tipografia(fig)
     st.plotly_chart(fig, use_container_width=True)
 
 

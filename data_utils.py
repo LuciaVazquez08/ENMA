@@ -7,6 +7,19 @@ from enma_palette import CHART_SEQUENCE, FONT_BODY
 DATA_PATH = "data/processed/ENMA.csv"
 
 
+def aplicar_tipografia(fig):
+    """DM Sans para todos los textos del gráfico. El título va aparte, vía st.subheader
+    (que ya hereda Syncopate del CSS global de la app), no como título nativo de Plotly."""
+    fig.update_layout(
+        font=dict(family=FONT_BODY),
+        legend=dict(font=dict(family=FONT_BODY)),
+        hoverlabel=dict(font=dict(family=FONT_BODY)),
+    )
+    fig.update_xaxes(title_font=dict(family=FONT_BODY), tickfont=dict(family=FONT_BODY))
+    fig.update_yaxes(title_font=dict(family=FONT_BODY), tickfont=dict(family=FONT_BODY))
+    return fig
+
+
 @st.cache_data
 def load_data() -> pd.DataFrame:
     return pd.read_csv(DATA_PATH)
@@ -101,7 +114,8 @@ def grafico_barras(
         fig.update_yaxes(range=[0, data["Porcentaje"].max() * 1.3])
         hovertemplate = "%{x}<br>Porcentaje: %{y:.1f}%<br>Personas: %{customdata[0]:,.0f}<extra></extra>"
     fig.update_traces(texttemplate="%{text}%", textposition="outside", hovertemplate=hovertemplate)
-    fig.update_layout(font_family=FONT_BODY, margin=dict(t=10, b=10))
+    fig.update_layout(margin=dict(t=10, b=10))
+    aplicar_tipografia(fig)
     if height:
         fig.update_layout(height=height)
     st.plotly_chart(fig, use_container_width=True)

@@ -3,6 +3,7 @@ import streamlit as st
 from data_utils import load_data, sidebar_filters
 from enma_palette import inject_fonts
 from views import (
+    control,
     discriminacion_violencia,
     documentacion,
     educacion,
@@ -36,6 +37,7 @@ paginas = [
     st.Page(salud.render, title="Salud", icon="🏥", url_path="salud"),
     st.Page(discriminacion_violencia.render, title="Discriminación y violencia", icon="⚠️", url_path="discriminacion-y-violencia"),
     st.Page(participacion.render, title="Participación y percepción", icon="🗳️", url_path="participacion-y-percepcion"),
+    st.Page(control.render, title="Control", icon="🛠️", url_path="control"),
 ]
 
 navegacion = st.navigation(paginas)
