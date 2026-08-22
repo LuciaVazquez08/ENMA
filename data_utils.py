@@ -70,6 +70,7 @@ def grafico_barras(
     titulo: str,
     orden: list | None = None,
     horizontal: bool = False,
+    height: int | None = None,
 ):
     st.subheader(titulo)
     data = distribucion(df, columna, orden)
@@ -90,7 +91,9 @@ def grafico_barras(
             color_discrete_sequence=CHART_SEQUENCE, text="Porcentaje",
         )
         fig.update_layout(xaxis_title=None, yaxis_title="Porcentaje (%)")
-        fig.update_yaxes(range=[0, data["Porcentaje"].max() * 1.15])
+        fig.update_yaxes(range=[0, data["Porcentaje"].max() * 1.3])
     fig.update_traces(texttemplate="%{text}%", textposition="outside")
-    fig.update_layout(font_family=FONT_BODY, margin=dict(t=10))
+    fig.update_layout(font_family=FONT_BODY, margin=dict(t=10, b=10))
+    if height:
+        fig.update_layout(height=height)
     st.plotly_chart(fig, use_container_width=True)

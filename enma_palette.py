@@ -79,6 +79,10 @@ def inject_fonts() -> None:
             letter-spacing: 0.02em;
             text-transform: uppercase;
         }}
+        .block-container {{
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }}
         </style>
         """,
         unsafe_allow_html=True,
