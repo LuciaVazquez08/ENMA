@@ -54,13 +54,17 @@ def get_df_filtrado() -> pd.DataFrame:
 
 
 def distribucion(df: pd.DataFrame, columna: str, orden: list | None = None) -> pd.DataFrame:
-    conteo = df[columna].dropna().value_counts(normalize=True).mul(100).round(1)
+    cantidad = df[columna].dropna().value_counts()
+    porcentaje = cantidad.div(cantidad.sum()).mul(100).round(1)
     if orden:
-        conteo = conteo.reindex([c for c in orden if c in conteo.index])
+        indice = [c for c in orden if c in cantidad.index]
     else:
-        conteo = conteo.sort_values(ascending=False)
-    data = conteo.reset_index()
-    data.columns = [columna, "Porcentaje"]
+        indice = porcentaje.sort_values(ascending=False).index
+    data = pd.DataFrame({
+        columna: indice,
+        "Porcentaje": porcentaje.reindex(indice).values,
+        "Cantidad": cantidad.reindex(indice).values,
+    })
     return data
 
 
@@ -82,17 +86,21 @@ def grafico_barras(
         fig = px.bar(
             data, x="Porcentaje", y=columna, orientation="h",
             color_discrete_sequence=CHART_SEQUENCE, text="Porcentaje",
+            custom_data=["Cantidad"],
         )
         fig.update_layout(yaxis_title=None, xaxis_title="Porcentaje (%)")
         fig.update_xaxes(range=[0, data["Porcentaje"].max() * 1.18])
+        hovertemplate = "%{y}<br>Porcentaje: %{x:.1f}%<br>Personas: %{customdata[0]:,.0f}<extra></extra>"
     else:
         fig = px.bar(
             data, x=columna, y="Porcentaje",
             color_discrete_sequence=CHART_SEQUENCE, text="Porcentaje",
+            custom_data=["Cantidad"],
         )
         fig.update_layout(xaxis_title=None, yaxis_title="Porcentaje (%)")
         fig.update_yaxes(range=[0, data["Porcentaje"].max() * 1.3])
-    fig.update_traces(texttemplate="%{text}%", textposition="outside")
+        hovertemplate = "%{x}<br>Porcentaje: %{y:.1f}%<br>Personas: %{customdata[0]:,.0f}<extra></extra>"
+    fig.update_traces(texttemplate="%{text}%", textposition="outside", hovertemplate=hovertemplate)
     fig.update_layout(font_family=FONT_BODY, margin=dict(t=10, b=10))
     if height:
         fig.update_layout(height=height)
