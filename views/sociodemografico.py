@@ -46,22 +46,18 @@ def _pais_por_genero(df):
     st.plotly_chart(fig, use_container_width=True)
 
 
-def _pertenencia_por_pais(df):
-    st.subheader("Pertenencia indígena y afrodescendencia")
-    sub = df.copy()
-    sub["Pueblos indígenas"] = sub["descendencia"] == "Descendencia Indígena"
-    sub["Afrodescendencia"] = sub["descendencia"] == "Afrodescendiente"
-    columnas = ["Pueblos indígenas", "Afrodescendencia"]
-    conteo = sub.groupby("pais_nacimiento")[columnas].sum()
-    tabla = sub.groupby("pais_nacimiento")[columnas].mean().mul(100).round(1)
+def _descendencia_por_pais(df):
+    st.subheader("Descendencia")
+    conteo = df.groupby(["pais_nacimiento", "descendencia"]).size().unstack(fill_value=0)
+    tabla = conteo.div(conteo.sum(axis=1), axis=0).mul(100).round(1)
     orden_paises = tabla.sum(axis=1).sort_values().index
     tabla = tabla.loc[orden_paises]
     conteo = conteo.loc[orden_paises]
-    data = tabla.reset_index().melt(id_vars="pais_nacimiento", var_name="Pertenencia", value_name="Porcentaje")
-    data_cantidad = conteo.reset_index().melt(id_vars="pais_nacimiento", var_name="Pertenencia", value_name="Cantidad")
-    data = data.merge(data_cantidad, on=["pais_nacimiento", "Pertenencia"])
+    data = tabla.reset_index().melt(id_vars="pais_nacimiento", var_name="Descendencia", value_name="Porcentaje")
+    data_cantidad = conteo.reset_index().melt(id_vars="pais_nacimiento", var_name="Descendencia", value_name="Cantidad")
+    data = data.merge(data_cantidad, on=["pais_nacimiento", "Descendencia"])
     fig = px.bar(
-        data, x="Porcentaje", y="pais_nacimiento", color="Pertenencia",
+        data, x="Porcentaje", y="pais_nacimiento", color="Descendencia",
         orientation="h", barmode="group",
         color_discrete_sequence=CHART_SEQUENCE,
         text="Porcentaje", custom_data=["Cantidad"],
@@ -114,7 +110,7 @@ def render():
     with col1:
         _pais_por_genero(df)
     with col2:
-        _pertenencia_por_pais(df)
+        _descendencia_por_pais(df)
 
     col3, col4, col5 = st.columns(3)
     with col3:
