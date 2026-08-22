@@ -94,26 +94,3 @@ def grafico_barras(
     fig.update_traces(texttemplate="%{text}%", textposition="outside")
     fig.update_layout(font_family=FONT_BODY, margin=dict(t=10))
     st.plotly_chart(fig, use_container_width=True)
-
-
-def grafico_binarias(df: pd.DataFrame, columnas: dict, titulo: str):
-    """columnas: {etiqueta: nombre_columna} de flags 0/1."""
-    st.subheader(titulo)
-    valores = {
-        etiqueta: (df[col].fillna(0).astype(float) == 1).mean() * 100
-        for etiqueta, col in columnas.items()
-        if col in df.columns
-    }
-    data = pd.Series(valores).round(1).sort_values(ascending=False).reset_index()
-    data.columns = ["Motivo", "Porcentaje"]
-    if data.empty:
-        st.info("Sin datos para este filtro.")
-        return
-    fig = px.bar(
-        data.iloc[::-1], x="Porcentaje", y="Motivo", orientation="h",
-        color_discrete_sequence=CHART_SEQUENCE, text="Porcentaje",
-    )
-    fig.update_traces(texttemplate="%{text}%", textposition="outside")
-    fig.update_layout(font_family=FONT_BODY, yaxis_title=None, xaxis_title="Porcentaje (%)", margin=dict(t=10))
-    fig.update_xaxes(range=[0, data["Porcentaje"].max() * 1.18])
-    st.plotly_chart(fig, use_container_width=True)
