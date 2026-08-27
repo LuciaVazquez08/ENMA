@@ -7,6 +7,10 @@ from enma_palette import CHART_SEQUENCE, FONT_BODY
 DATA_PATH = "data/processed/ENMA.csv"
 
 
+@st.cache_data
+def load_data() -> pd.DataFrame:
+    return pd.read_csv(DATA_PATH)
+
 def aplicar_tipografia(fig):
     """DM Sans para todos los textos del gráfico. El título va aparte, vía st.subheader
     (que ya hereda Syncopate del CSS global de la app), no como título nativo de Plotly."""
@@ -18,12 +22,6 @@ def aplicar_tipografia(fig):
     fig.update_xaxes(title_font=dict(family=FONT_BODY), tickfont=dict(family=FONT_BODY))
     fig.update_yaxes(title_font=dict(family=FONT_BODY), tickfont=dict(family=FONT_BODY))
     return fig
-
-
-@st.cache_data
-def load_data() -> pd.DataFrame:
-    return pd.read_csv(DATA_PATH)
-
 
 def sidebar_filters(df: pd.DataFrame) -> pd.DataFrame:
     st.sidebar.header("Filtros")
@@ -57,7 +55,6 @@ def sidebar_filters(df: pd.DataFrame) -> pd.DataFrame:
     contador.caption(f"{len(df_filtrado):,}".replace(",", ".") + " personas encuestadas")
 
     return df_filtrado
-
 
 def get_df_filtrado() -> pd.DataFrame:
     df_filtrado = st.session_state.get("df_filtrado")

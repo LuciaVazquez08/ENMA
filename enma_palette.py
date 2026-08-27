@@ -16,44 +16,38 @@ Uso típico en un dashboard Streamlit:
 """
 
 COLORS = {
-    # Paleta cálida (amarillo -> naranja), usada en el sitio para acentos y CTAs
     "yellow_1": "#FFC456",
     "yellow_2": "#FFA602",
     "orange_1": "#FF7900",   # color primario de marca
     "orange_2": "#FF4900",
 
-    # Paleta fría (azul), usada como color secundario / links / hero
     "blue": "#027BFF",
     "blue_dark": "#0055CC",
     "blue_pale": "#D6EAFF",
     "blue_accent": "#3DA0FF",
 
-    # Texto
     "text": "#0F0F1A",    # texto principal
     "text_2": "#2E2E4A",  # texto secundario
     "text_3": "#6B6B8A",  # texto terciario / muted
 
-    # Neutros de layout observados en tarjetas/bordes del sitio
     "border": "#E6E9F2",
     "background": "#FFFFFF",
     "background_alt": "#F5F7FB",
 }
 
-# Secuencia ordenada lista para pasar a color_discrete_sequence (Plotly) o
-# range (Altair) en gráficos categóricos, siguiendo el degradé cálido→frío del sitio.
+
 CHART_SEQUENCE = [
     COLORS["orange_1"],
-    COLORS["blue"],
+    COLORS["blue_dark"],
     COLORS["yellow_2"],
     COLORS["blue_accent"],
     COLORS["orange_2"],
     COLORS["yellow_1"],
-    COLORS["blue_dark"],
+    COLORS["blue"],
     COLORS["text_3"],
 ]
 
-# Tipografías reales del sitio
-FONT_HEADINGS = '"Syncopate", sans-serif'   # usada en h1/h2 (todo mayúsculas, tracking amplio en el sitio)
+FONT_HEADINGS = '"Syncopate", sans-serif'   # usada en h1/h2 
 FONT_BODY = '"DM Sans", sans-serif'         # usada en body/nav/texto general
 
 
@@ -75,7 +69,7 @@ def inject_fonts() -> None:
             color: {COLORS['text']};
         }}
         h1, h2, h3 {{
-            font-family: {FONT_HEADINGS};
+            font-family: {FONT_HEADINGS} !important;
             letter-spacing: 0.02em;
             text-transform: uppercase;
         }}

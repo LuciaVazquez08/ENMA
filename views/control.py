@@ -1,19 +1,29 @@
+import re
+from pathlib import Path
+
 import streamlit as st
 
 from data_utils import load_data
 
-COLUMNAS_USADAS = {
-    "Año",
-    "pais_nacimiento",
-    "pais_nacimiento_var",
-    "genero_agrup",
-    "edad_agrupada",
-    "region",
-    "descendencia",
-    "nivel_educativo_agrup",
-    "periodo_residencia",
-}
+RAIZ = Path(__file__).resolve().parent.parent
 
+
+def _archivos_a_revisar() -> list[Path]:
+    archivos = [RAIZ / "app.py", RAIZ / "data_utils.py"]
+    archivos += [
+        f for f in (RAIZ / "views").glob("*.py")
+        if f.name not in ("control.py", "__init__.py")
+    ]
+    return archivos
+
+def _columnas_usadas(columnas) -> set[str]:
+    codigo = "\n".join(
+        f.read_text(encoding="utf-8") for f in _archivos_a_revisar() if f.exists()
+    )
+    return {
+        columna for columna in columnas
+        if re.search(rf'["\']{re.escape(columna)}["\']', codigo)
+    }
 
 def render():
     st.title("Control de variables")
@@ -23,7 +33,8 @@ def render():
     )
 
     df = load_data()
-    columnas_no_usadas = [c for c in df.columns if c not in COLUMNAS_USADAS]
+    usadas = _columnas_usadas(df.columns)
+    columnas_no_usadas = [c for c in df.columns if c not in usadas]
 
     st.caption(f"{len(columnas_no_usadas)} de {len(df.columns)} columnas del dataset sin usar todavía.")
 
