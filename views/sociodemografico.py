@@ -9,7 +9,6 @@ PERIODO_RESIDENCIA_ORDEN = ["Hasta 5 años", "Entre 5 y 9 años", "Más de 10 a�
 ALTURA_GRANDE = 300
 ALTURA_CHICA = 180
 
-
 def _pais_por_genero(df):
     st.subheader("País de origen")
     conteo = df.groupby(["pais_nacimiento", "genero_agrup"]).size().unstack(fill_value=0)
