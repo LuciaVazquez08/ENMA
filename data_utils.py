@@ -12,15 +12,15 @@ def load_data() -> pd.DataFrame:
     return pd.read_csv(DATA_PATH)
 
 def aplicar_tipografia(fig):
-    """DM Sans para todos los textos del gráfico. El título va aparte, vía st.subheader
+    """DM Sans en negro puro para todos los textos del gráfico. El título va aparte, vía st.subheader
     (que ya hereda Syncopate del CSS global de la app), no como título nativo de Plotly."""
     fig.update_layout(
-        font=dict(family=FONT_BODY),
-        legend=dict(font=dict(family=FONT_BODY)),
-        hoverlabel=dict(font=dict(family=FONT_BODY)),
+        font=dict(family=FONT_BODY, color="#000000"),
+        legend=dict(font=dict(family=FONT_BODY, color="#000000")),
+        hoverlabel=dict(font=dict(family=FONT_BODY, color="#000000")),
     )
-    fig.update_xaxes(title_font=dict(family=FONT_BODY), tickfont=dict(family=FONT_BODY))
-    fig.update_yaxes(title_font=dict(family=FONT_BODY), tickfont=dict(family=FONT_BODY))
+    fig.update_xaxes(title_font=dict(family=FONT_BODY, color="#000000"), tickfont=dict(family=FONT_BODY, color="#000000"))
+    fig.update_yaxes(title_font=dict(family=FONT_BODY, color="#000000"), tickfont=dict(family=FONT_BODY, color="#000000"))
     return fig
 
 def sidebar_filters(df: pd.DataFrame) -> pd.DataFrame:
