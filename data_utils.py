@@ -27,6 +27,7 @@ def load_data() -> pd.DataFrame:
 
 def sidebar_filters(df: pd.DataFrame) -> pd.DataFrame:
     st.sidebar.header("Filtros")
+    contador = st.sidebar.empty()
 
     anios = sorted(df["Año"].dropna().unique())
     sel_anios = st.sidebar.multiselect("Edición / Año", anios, default=anios, key="f_anio")
@@ -53,7 +54,7 @@ def sidebar_filters(df: pd.DataFrame) -> pd.DataFrame:
         & df["region"].isin(sel_regiones)
     ]
 
-    st.sidebar.caption(f"{len(df_filtrado):,}".replace(",", ".") + " personas encuestadas")
+    contador.caption(f"{len(df_filtrado):,}".replace(",", ".") + " personas encuestadas")
 
     return df_filtrado
 
