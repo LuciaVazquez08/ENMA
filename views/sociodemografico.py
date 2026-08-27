@@ -4,13 +4,6 @@ import streamlit as st
 from data_utils import aplicar_tipografia, get_df_filtrado, grafico_barras
 from enma_palette import CHART_SEQUENCE
 
-NIVEL_EDUCATIVO_ORDEN = [
-    "Hasta secundario incompleto",
-    "Secundario completo",
-    "Superior o universitario completo y más",
-    "Prefiero no responder",
-]
-
 PERIODO_RESIDENCIA_ORDEN = ["Hasta 5 años", "Entre 5 y 9 años", "Más de 10 años"]
 
 ALTURA_GRANDE = 300
@@ -103,8 +96,8 @@ def _region_por_edad(df):
 def render():
     df = get_df_filtrado()
 
-    st.title("Perfil sociodemográfico")
-    st.caption("Composición de la población migrante encuestada según origen, género, descendencia, edad, región y nivel educativo.")
+    st.title("Datos sociodemográficos")
+    st.caption("Composición de la población migrante encuestada según origen, género, descendencia, idioma, edad, región y tiempo de residencia.")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -116,6 +109,6 @@ def render():
     with col3:
         _region_por_edad(df)
     with col4:
-        grafico_barras(df, "nivel_educativo_agrup", "Nivel educativo", orden=NIVEL_EDUCATIVO_ORDEN, height=ALTURA_CHICA)
+        grafico_barras(df, "idioma_var", "Lenguas habladas", horizontal=True, height=ALTURA_CHICA)
     with col5:
         grafico_barras(df, "periodo_residencia", "Años de residencia", orden=PERIODO_RESIDENCIA_ORDEN, height=ALTURA_CHICA)

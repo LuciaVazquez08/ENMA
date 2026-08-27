@@ -7,13 +7,14 @@ from views import (
     discriminacion_violencia,
     documentacion,
     educacion,
-    familia_hogar_vivienda,
-    identidad_lenguas,
+    familia_hogar,
+    hijos_educacion,
     participacion,
     salud,
     sociodemografico,
     trabajo,
     trayectoria_migratoria,
+    vivienda,
 )
 
 st.set_page_config(
@@ -27,16 +28,17 @@ df = load_data()
 st.session_state["df_filtrado"] = sidebar_filters(df)
 
 paginas = [
-    st.Page(sociodemografico.render, title="Sociodemográfico", icon="🧑‍🤝‍🧑", url_path="sociodemografico", default=True),
-    st.Page(identidad_lenguas.render, title="Identidad y lenguas", icon="🌐", url_path="identidad-y-lenguas"),
-    st.Page(trayectoria_migratoria.render, title="Trayectoria migratoria", icon="🧭", url_path="trayectoria-migratoria"),
-    st.Page(documentacion.render, title="Documentación y asilo", icon="🪪", url_path="documentacion-y-asilo"),
-    st.Page(familia_hogar_vivienda.render, title="Familia, hogar y vivienda", icon="🏠", url_path="familia-hogar-y-vivienda"),
-    st.Page(educacion.render, title="Educación", icon="🎓", url_path="educacion"),
-    st.Page(trabajo.render, title="Trabajo y economía", icon="💼", url_path="trabajo-y-economia"),
-    st.Page(salud.render, title="Salud", icon="🏥", url_path="salud"),
+    st.Page(sociodemografico.render, title="Datos sociodemográficos", icon="🧑‍🤝‍🧑", url_path="datos-sociodemograficos", default=True),
+    st.Page(trayectoria_migratoria.render, title="Trayectoria y proyecto migratorio", icon="🧭", url_path="trayectoria-y-proyecto-migratorio"),
+    st.Page(documentacion.render, title="Situación documentaria", icon="🪪", url_path="situacion-documentaria"),
+    st.Page(familia_hogar.render, title="Situación familiar y hogar", icon="👪", url_path="situacion-familiar-y-hogar"),
+    st.Page(hijos_educacion.render, title="Hijos/as y educación", icon="🧒", url_path="hijos-y-educacion"),
+    st.Page(salud.render, title="Derecho a la salud", icon="🏥", url_path="derecho-a-la-salud"),
+    st.Page(vivienda.render, title="Vivienda", icon="🏠", url_path="vivienda"),
+    st.Page(educacion.render, title="Trayectoria educativa (adultos/as)", icon="🎓", url_path="trayectoria-educativa-adultos"),
+    st.Page(trabajo.render, title="Situación socioeconómica", icon="💼", url_path="situacion-socioeconomica"),
     st.Page(discriminacion_violencia.render, title="Discriminación y violencia", icon="⚠️", url_path="discriminacion-y-violencia"),
-    st.Page(participacion.render, title="Participación y percepción", icon="🗳️", url_path="participacion-y-percepcion"),
+    st.Page(participacion.render, title="Participación social y política", icon="🗳️", url_path="participacion-social-y-politica"),
     st.Page(control.render, title="Control", icon="🛠️", url_path="control"),
 ]
 
