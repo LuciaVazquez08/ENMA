@@ -19,7 +19,7 @@ El objetivo principal es proporcionar a investigadores, organismos y al público
 ## 🛠️ Stack Tecnológico
 
 * **Lenguaje:** Python
-* **Procesamiento (ETL):** Pandas, NumPy, RegEx.
+* **Procesamiento (ETL):** Pandas y NumPy.
 * **Visualización:** Plotly, Seaborn, Matplotlib, HoloViews, hvPlot.
 * **Framework de Aplicación:** Streamlit.
 
@@ -29,7 +29,7 @@ El objetivo principal es proporcionar a investigadores, organismos y al público
 - `scripts/`: Scripts de Python para la limpieza y transformación de datos.
 - `data/raw/`: Datasets originales (2020, 2023 y matriz de coincidencia).
 - `data/processed/`: Dataset final armonizado utilizado por el tablero.
-- `notebooks/`: Análisis exploratorio de datos (EDA) previo.
+- `views/`: Las distintas paginas dentro del tablero..
 - `requirements.txt`: Lista de dependencias con versiones específicas.
 
 ## ⚙️ Instalación y Reproducibilidad

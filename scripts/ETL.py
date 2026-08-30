@@ -206,8 +206,7 @@ def run_etl():
     df_2020.replace({'pais_nacimiento': {'Holanda': 'Países Bajos'}}, inplace=True)
     df_2020['pais_nacimiento'] = df_2020['pais_nacimiento'].apply(normalizar_pais)
 
-    df_2020['pais_nacimiento_var'] = df_2020['q3_pais']
-    df_2020.replace({'pais_nacimiento_var': {'Otro (especifique)': 'Otro'}}, inplace=True)
+    df_2020['pais_nacimiento_var'] = df_2020['nacionalidad_c'].fillna('Otro')
 
     df_2020.drop(columns=['q3_pais', 'q3_otro', 'nacionalidad_c'], inplace=True)
 
@@ -215,29 +214,12 @@ def run_etl():
     df_2023['pais_nacimiento'] = df_2023['pais_nacimiento'].apply(normalizar_pais)
     df_2023.replace({'pais_nacimiento': {'Usa': 'Estados Unidos', 'Ee.Uu.': 'Estados Unidos', 'Estados Unidos De América': 'Estados Unidos', 'Estados Unidos Mexicanos': 'México', 'Hondurqwy': 'Honduras', 'Eeuu': 'Estados Unidos', 'Los Estados Unidos': 'Estados Unidos', 'Hungria pero soy Venezolana': 'Hungría', 'Costa Rics': 'Costa Rica', 'Mexico': 'México', 'El salvador': 'El Salvador'}}, inplace=True)
     
-    df_2023['pais_nacimiento_var'] = df_2023['q3_pais_nacimiento']
+    df_2023['pais_nacimiento_var'] = df_2023['nacionalidad_var'].fillna('Otro')
 
-    df_2023.drop(columns=["q3_pais_nacimiento", "q3_pais_otro"], inplace=True)
+    df_2023.drop(columns=["q3_pais_nacimiento", "q3_pais_otro", "nacionalidad_var"], inplace=True)
 
     df_2020 = filtrar_pais_nacimiento(df_2020)
     df_2023 = filtrar_pais_nacimiento(df_2023)
-
-    conteo_2020 = df_2020['pais_nacimiento_var'].value_counts()
-    conteo_2023 = df_2023['pais_nacimiento_var'].value_counts()
-
-    conteo_total = conteo_2020.add(conteo_2023, fill_value=0)
-    conteo_total = conteo_total.drop(labels='Otro', errors='ignore')
-    top9 = conteo_total.nlargest(9).index.tolist()
-
-    if 'China' not in top9:
-        top9 = top9[:-1] + ['China']  # saca el último, agrega China
-
-    df_2020['pais_nacimiento_var'] = df_2020['pais_nacimiento_var'].where(
-        df_2020['pais_nacimiento_var'].isin(top9), other='Otro'
-    )
-    df_2023['pais_nacimiento_var'] = df_2023['pais_nacimiento_var'].where(
-        df_2023['pais_nacimiento_var'].isin(top9), other='Otro'
-    )
 
     #GENERO
     df_2020["genero_agrup"] = np.where(df_2020['q1_genero'] == 'Mujer', df_2020['q1_genero'], np.where(df_2020['q1_genero'] == 'Hombre', 'Varón', np.where(df_2020['q1_genero'] == 'No quiere informar', 'Prefiero no responder', 'Otro género')))
@@ -1536,7 +1518,7 @@ def run_etl():
         'q49_deudas_familiaresorig', 'q49_deudas_no', 'q5_idioma', 'q5_otro'
     ], inplace=True)
     df_2023.drop(columns=[
-        'anios_residencia', 'motivos_habitat', 'nacionalidad_agrup', 'nacionalidad_var', 'niveled_agrup',
+        'anios_residencia', 'motivos_habitat', 'nacionalidad_agrup', 'niveled_agrup',
         'q19_documento_detalle', 'q21_dificultad_dni_detalle', 'q21_dni_dificultad', 'q21_dni_dificultad_turnos.1',
         'q4_otro', 'q5_descendencia', 'q5_descendencia_otro_descrip', 'q6_idioma', 'q6_otro', 'sec_completo_agrup'
     ], inplace=True)
