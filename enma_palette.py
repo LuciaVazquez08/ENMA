@@ -26,28 +26,28 @@ COLORS = {
     "blue_pale": "#D6EAFF",
     "blue_accent": "#3DA0FF",
 
-    "text": "#0F0F1A",  
-    "text_2": "#2E2E4A",  
-    "text_3": "#6B6B8A",  
+    "text": "#0F0F1A",    # texto principal
+    "text_2": "#2E2E4A",  # texto secundario
+    "text_3": "#6B6B8A",  # texto terciario / muted
 
     "border": "#E6E9F2",
     "background": "#FFFFFF",
     "background_alt": "#F5F7FB",
 }
 
-
 CHART_SEQUENCE = [
     COLORS["orange_1"],
-    COLORS["blue_dark"],
+    COLORS["blue"],
     COLORS["yellow_2"],
     COLORS["blue_accent"],
     COLORS["orange_2"],
     COLORS["yellow_1"],
-    COLORS["blue"],
+    COLORS["blue_dark"],
     COLORS["text_3"],
 ]
 
-FONT_HEADINGS = '"Syncopate", sans-serif'    
+
+FONT_HEADINGS = '"Syncopate", sans-serif'   
 FONT_BODY = '"DM Sans", sans-serif'         
 
 
@@ -68,8 +68,8 @@ def inject_fonts() -> None:
             font-family: {FONT_BODY};
             color: {COLORS['text']};
         }}
-        h1 {{
-            font-family: {FONT_HEADINGS} !important;
+        h1, h2, h3 {{
+            font-family: {FONT_HEADINGS};
             letter-spacing: 0.02em;
             text-transform: uppercase;
         }}

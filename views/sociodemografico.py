@@ -1,13 +1,23 @@
 import plotly.express as px
 import streamlit as st
 
-from data_utils import aplicar_tipografia, get_df_filtrado, grafico_barras
+from data_utils import (
+    aplicar_filtros,
+    aplicar_tipografia,
+    filtro_edicion,
+    filtro_nacionalidad,
+    filtro_region,
+    grafico_barras,
+    iniciar_filtros,
+    load_data,
+)
 from enma_palette import CHART_SEQUENCE
 
 PERIODO_RESIDENCIA_ORDEN = ["Hasta 5 años", "Entre 5 y 9 años", "Más de 10 años"]
 
 ALTURA_GRANDE = 300
 ALTURA_CHICA = 180
+
 
 def _pais_por_genero(df):
     st.subheader("País de origen")
@@ -93,7 +103,14 @@ def _region_por_edad(df):
 
 
 def render():
-    df = get_df_filtrado()
+    df = load_data()
+    contador = iniciar_filtros()
+
+    mask = filtro_edicion(df, "socio_edicion")
+    mask &= filtro_nacionalidad(df, "socio_nacionalidad")
+    mask &= filtro_region(df, "socio_region")
+
+    df = aplicar_filtros(df, mask, contador)
 
     st.title("Datos sociodemográficos")
     st.caption("Composición de la población migrante encuestada según origen, género, descendencia, idioma, edad, región y tiempo de residencia.")

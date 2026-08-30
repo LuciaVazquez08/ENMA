@@ -7,58 +7,68 @@ from enma_palette import CHART_SEQUENCE, FONT_BODY
 DATA_PATH = "data/processed/ENMA.csv"
 
 
+def aplicar_tipografia(fig):
+    """DM Sans para todos los textos del gráfico. El título va aparte, vía st.subheader
+    (que ya hereda Syncopate del CSS global de la app), no como título nativo de Plotly."""
+    fig.update_layout(
+        font=dict(family=FONT_BODY),
+        legend=dict(font=dict(family=FONT_BODY)),
+        hoverlabel=dict(font=dict(family=FONT_BODY)),
+    )
+    fig.update_xaxes(title_font=dict(family=FONT_BODY), tickfont=dict(family=FONT_BODY))
+    fig.update_yaxes(title_font=dict(family=FONT_BODY), tickfont=dict(family=FONT_BODY))
+    return fig
+
+
 @st.cache_data
 def load_data() -> pd.DataFrame:
     return pd.read_csv(DATA_PATH)
 
-def aplicar_tipografia(fig):
-    """DM Sans en negro puro para todos los textos del gráfico. El título va aparte, vía st.subheader
-    (que ya hereda Syncopate del CSS global de la app), no como título nativo de Plotly."""
-    fig.update_layout(
-        font=dict(family=FONT_BODY, color="#000000"),
-        legend=dict(font=dict(family=FONT_BODY, color="#000000")),
-        hoverlabel=dict(font=dict(family=FONT_BODY, color="#000000")),
-    )
-    fig.update_xaxes(title_font=dict(family=FONT_BODY, color="#000000"), tickfont=dict(family=FONT_BODY, color="#000000"))
-    fig.update_yaxes(title_font=dict(family=FONT_BODY, color="#000000"), tickfont=dict(family=FONT_BODY, color="#000000"))
-    return fig
 
-def sidebar_filters(df: pd.DataFrame) -> pd.DataFrame:
+def iniciar_filtros() -> "st.delta_generator.DeltaGenerator":
+    """Encabezado del panel de filtros de la página + placeholder para el contador
+    de encuestados (se completa recién en aplicar_filtros, una vez armada la máscara)."""
     st.sidebar.header("Filtros")
-    contador = st.sidebar.empty()
+    return st.sidebar.empty()
 
+
+def filtro_edicion(df: pd.DataFrame, key: str) -> pd.Series:
     anios = sorted(df["Año"].dropna().unique())
-    sel_anios = st.sidebar.multiselect("Edición / Año", anios, default=anios, key="f_anio")
+    seleccion = st.sidebar.selectbox("Edición / Año", anios, key=key)
+    return df["Año"] == seleccion
 
+
+def filtro_nacionalidad(df: pd.DataFrame, key: str) -> pd.Series:
     nacionalidades = sorted(df["pais_nacimiento_var"].dropna().unique())
-    sel_nacionalidades = st.sidebar.multiselect(
-        "Nacionalidad", nacionalidades, default=nacionalidades, key="f_nacionalidad"
-    )
+    seleccion = st.sidebar.multiselect("Nacionalidad", nacionalidades, default=nacionalidades, key=key)
+    return df["pais_nacimiento_var"].isin(seleccion)
 
+
+def filtro_genero(df: pd.DataFrame, key: str) -> pd.Series:
     generos = sorted(df["genero_agrup"].dropna().unique())
-    sel_generos = st.sidebar.multiselect("Género", generos, default=generos, key="f_genero")
+    seleccion = st.sidebar.multiselect("Género", generos, default=generos, key=key)
+    return df["genero_agrup"].isin(seleccion)
 
+
+def filtro_edad(df: pd.DataFrame, key: str) -> pd.Series:
     edades = sorted(df["edad_agrupada"].dropna().unique())
-    sel_edades = st.sidebar.multiselect("Edades", edades, default=edades, key="f_edad")
+    seleccion = st.sidebar.multiselect("Edades", edades, default=edades, key=key)
+    return df["edad_agrupada"].isin(seleccion)
 
+
+def filtro_region(df: pd.DataFrame, key: str) -> pd.Series:
     regiones = sorted(df["region"].dropna().unique())
-    sel_regiones = st.sidebar.multiselect("Región", regiones, default=regiones, key="f_region")
+    seleccion = st.sidebar.multiselect("Región", regiones, default=regiones, key=key)
+    return df["region"].isin(seleccion)
 
-    df_filtrado = df[
-        df["Año"].isin(sel_anios)
-        & df["pais_nacimiento_var"].isin(sel_nacionalidades)
-        & df["genero_agrup"].isin(sel_generos)
-        & df["edad_agrupada"].isin(sel_edades)
-        & df["region"].isin(sel_regiones)
-    ]
 
+def aplicar_filtros(df: pd.DataFrame, mask: pd.Series, contador) -> pd.DataFrame:
+    """Filtra df con la máscara combinada de la página, actualiza el contador de
+    encuestados (en el placeholder reservado por iniciar_filtros) y frena la
+    ejecución si el cruce de filtros no deja ningún registro."""
+    df_filtrado = df[mask]
     contador.caption(f"{len(df_filtrado):,}".replace(",", ".") + " personas encuestadas")
-
-    return df_filtrado
-
-def get_df_filtrado() -> pd.DataFrame:
-    df_filtrado = st.session_state.get("df_filtrado")
-    if df_filtrado is None or df_filtrado.empty:
+    if df_filtrado.empty:
         st.warning("No hay datos para los filtros seleccionados.")
         st.stop()
     return df_filtrado
