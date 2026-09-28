@@ -57,7 +57,9 @@ def render():
     grafico_multiseleccion(
         df[no_voto_local], MOTIVOS_NO_VOTO_LOCAL,
         "Motivos de no participación en elecciones locales",
-        "Qué % de quienes no votaron declaró cada motivo (pregunta de selección múltiple: una persona puede tener más de un motivo).",
+        "Qué % de quienes no votaron declaró cada motivo. En 2023 la pregunta admite selección "
+        "múltiple (una persona puede tener más de un motivo); en 2020 era mayormente de opción "
+        "única, salvo entre quienes no pudieron votar, donde sí podían marcar más de una causa.",
     )
 
     grafico_barras(df, "motivo_no_voto_extranjero", "Motivo de no participación en elecciones del país de origen", horizontal=True)

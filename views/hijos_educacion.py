@@ -38,5 +38,7 @@ def render():
     grafico_multiseleccion(
         df[sin_problemas], INCONVENIENTES_EDUCACION_HIJOS,
         "Inconvenientes para la inscripción escolar de hijos/as",
-        "Qué % de quienes tuvieron algún inconveniente declaró cada tipo (pregunta de selección múltiple: una persona puede haber tenido más de uno).",
+        "Qué % de quienes tuvieron algún inconveniente declaró cada tipo. En la edición 2023 la "
+        "pregunta admite selección múltiple (una persona puede haber tenido más de un "
+        "inconveniente); en 2020 se relevó como selección única (un solo inconveniente por persona).",
     )

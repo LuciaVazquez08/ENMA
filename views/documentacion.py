@@ -39,5 +39,7 @@ def render():
     grafico_multiseleccion(
         df, DIFICULTADES_DNI,
         "Tipos de dificultades para tramitar o renovar el DNI",
-        "Qué % de quienes tuvieron que tramitar el DNI declaró cada dificultad (pregunta de selección múltiple: una persona puede haber tenido más de una).",
+        "Qué % de quienes tuvieron dificultades declaró cada tipo. En la edición 2023 la pregunta "
+        "admite selección múltiple (una persona puede haber tenido más de una dificultad); en "
+        "2020 se relevó como selección única (una sola dificultad por persona).",
     )
