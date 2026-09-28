@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -23,15 +25,38 @@ def aplicar_tipografia(fig):
 
 
 @st.cache_data
-def load_data() -> pd.DataFrame:
+def _leer_datos(_mtime: float) -> pd.DataFrame:
     return pd.read_csv(DATA_PATH)
+
+
+def load_data() -> pd.DataFrame:
+    """`st.cache_data` cachea por código + argumentos, no por el contenido del archivo: si
+    ENMA.csv cambia (nuevo commit) pero el proceso de Streamlit sigue "caliente" (no se reinició),
+    sin este truco seguiría sirviendo el CSV viejo cacheado. Pasar la fecha de modificación del
+    archivo como argumento oculto hace que la key de cache cambie sola cada vez que el CSV se
+    actualiza, sin depender de un reinicio manual."""
+    return _leer_datos(os.path.getmtime(DATA_PATH))
 
 
 def iniciar_filtros() -> "st.delta_generator.DeltaGenerator":
     """Encabezado del panel de filtros de la página + placeholder para el contador
-    de encuestados (se completa recién en aplicar_filtros, una vez armada la máscara)."""
+    de encuestados (se completa recién en aplicar_filtros, una vez armada la máscara).
+    También reinicia la rotación de colores de los gráficos (ver `_siguiente_color`), para que
+    cada página vuelva a empezar por el primer color de la paleta en su primer gráfico."""
+    st.session_state["_color_index"] = 0
     st.sidebar.header("Filtros")
     return st.sidebar.empty()
+
+
+def _siguiente_color() -> str:
+    """Devuelve el próximo color de CHART_SEQUENCE y avanza la rotación un lugar. Todas las
+    barras de un mismo gráfico comparten ese único color (Plotly, sin una columna `color`, ya
+    pinta toda la serie de un solo color); lo que rota es el color ENTRE gráficos, para que los
+    distintos gráficos de barra de una misma página no salgan todos naranja. La rotación se
+    reinicia en `iniciar_filtros`, al principio de cada página."""
+    indice = st.session_state.get("_color_index", 0)
+    st.session_state["_color_index"] = indice + 1
+    return CHART_SEQUENCE[indice % len(CHART_SEQUENCE)]
 
 
 def filtro_edicion(df: pd.DataFrame, key: str, reset_keys: list[str] | None = None) -> pd.Series:
@@ -143,37 +168,51 @@ def grafico_barras(
         if data.empty:
             st.info("Sin datos para este filtro.")
             return
+        color = _siguiente_color()
         if horizontal:
             data = data.iloc[::-1]
             fig = px.bar(
                 data, x="Porcentaje", y=columna, orientation="h",
-                color_discrete_sequence=CHART_SEQUENCE, text="Porcentaje",
+                color_discrete_sequence=[color], text="Porcentaje",
                 custom_data=["Cantidad"],
             )
             fig.update_layout(yaxis_title=None, xaxis_title="Porcentaje (%)")
             fig.update_xaxes(range=[0, data["Porcentaje"].max() * 1.18])
             hovertemplate = (
-                "%{y}<br>Porcentaje: %{x:.1f}%<br>"
-                f"<span style='color:{COLOR_DETALLE}'>Personas (ponderado): %{{customdata[0]:,.0f}}</span>"
+                "%{y}<br>Porcentaje: %{x:.1f}%"
+                # Detalle de personas (ponderado) deshabilitado a pedido; customdata queda
+                # disponible para reactivarlo agregando de nuevo el <span> con %{customdata[0]}.
                 "<extra></extra>"
             )
         else:
             fig = px.bar(
                 data, x=columna, y="Porcentaje",
-                color_discrete_sequence=CHART_SEQUENCE, text="Porcentaje",
+                color_discrete_sequence=[color], text="Porcentaje",
                 custom_data=["Cantidad"],
             )
             fig.update_layout(xaxis_title=None, yaxis_title="Porcentaje (%)")
             fig.update_yaxes(range=[0, data["Porcentaje"].max() * 1.3])
             hovertemplate = (
-                "%{x}<br>Porcentaje: %{y:.1f}%<br>"
-                f"<span style='color:{COLOR_DETALLE}'>Personas (ponderado): %{{customdata[0]:,.0f}}</span>"
+                "%{x}<br>Porcentaje: %{y:.1f}%"
+                # Detalle de personas (ponderado) deshabilitado a pedido; customdata queda
+                # disponible para reactivarlo agregando de nuevo el <span> con %{customdata[0]}.
                 "<extra></extra>"
             )
         fig.update_traces(texttemplate="%{text}%", textposition="outside", hovertemplate=hovertemplate)
         fig.update_layout(margin=dict(t=25, b=25, l=15, r=15))
         aplicar_tipografia(fig)
         st.plotly_chart(fig, width="stretch")
+
+
+def _a_binario(serie: pd.Series) -> pd.Series:
+    """Normaliza a 0.0/1.0/NaN una columna booleana ponderable armada por `construir_multiseleccion`
+    en el ETL. Al guardarse y releerse desde CSV, True/False pueden volver como bool de Python,
+    como texto ("True"/"False") o, si pandas ya los infirió como booleanos puros, como su propio
+    dtype; `.astype(float)` a secas rompe con cualquiera de las variantes de texto."""
+    return pd.to_numeric(
+        serie.replace({True: 1, False: 0, "True": 1, "False": 0}),
+        errors="coerce",
+    )
 
 
 def grafico_multiseleccion(
@@ -198,7 +237,7 @@ def grafico_multiseleccion(
             datos = df.dropna(subset=[columna])
             if datos.empty:
                 continue
-            seleccionado = datos[columna].astype(float)
+            seleccionado = _a_binario(datos[columna])
             peso = datos[columna_peso]
             total_peso = peso.sum()
             if not total_peso:
@@ -215,14 +254,15 @@ def grafico_multiseleccion(
         data = pd.DataFrame(filas).sort_values("Porcentaje", ascending=True)
         fig = px.bar(
             data, x="Porcentaje", y="Opción", orientation="h",
-            color_discrete_sequence=CHART_SEQUENCE, text="Porcentaje",
+            color_discrete_sequence=[_siguiente_color()], text="Porcentaje",
             custom_data=["Cantidad"],
         )
         fig.update_layout(yaxis_title=None, xaxis_title="Porcentaje (%)")
         fig.update_xaxes(range=[0, data["Porcentaje"].max() * 1.18])
         hovertemplate = (
-            "%{y}<br>Porcentaje: %{x:.1f}%<br>"
-            f"<span style='color:{COLOR_DETALLE}'>Personas (ponderado): %{{customdata[0]:,.0f}}</span>"
+            "%{y}<br>Porcentaje: %{x:.1f}%"
+            # Detalle de personas (ponderado) deshabilitado a pedido; customdata queda
+            # disponible para reactivarlo agregando de nuevo el <span> con %{customdata[0]}.
             "<extra></extra>"
         )
         fig.update_traces(texttemplate="%{text}%", textposition="outside", hovertemplate=hovertemplate)
