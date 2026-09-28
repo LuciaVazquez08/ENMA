@@ -48,16 +48,15 @@ def iniciar_filtros() -> "st.delta_generator.DeltaGenerator":
     return st.sidebar.empty()
 
 
-def _colores_para(cantidad: int) -> list[str]:
-    """Devuelve `cantidad` colores de CHART_SEQUENCE (repitiendo el ciclo si hace falta) y avanza
-    la rotación esa misma cantidad de posiciones. Se usa para pintar cada barra de un gráfico con
-    un color distinto (Plotly, sin una columna `color`, pinta todas las barras de una serie con un
-    único color) y, de paso, para que el siguiente gráfico de la página continúe la secuencia en
-    vez de repetir siempre los mismos primeros colores. La rotación se reinicia en
-    `iniciar_filtros`, al principio de cada página."""
-    inicio = st.session_state.get("_color_index", 0)
-    st.session_state["_color_index"] = inicio + cantidad
-    return [CHART_SEQUENCE[(inicio + i) % len(CHART_SEQUENCE)] for i in range(cantidad)]
+def _siguiente_color() -> str:
+    """Devuelve el próximo color de CHART_SEQUENCE y avanza la rotación un lugar. Todas las
+    barras de un mismo gráfico comparten ese único color (Plotly, sin una columna `color`, ya
+    pinta toda la serie de un solo color); lo que rota es el color ENTRE gráficos, para que los
+    distintos gráficos de barra de una misma página no salgan todos naranja. La rotación se
+    reinicia en `iniciar_filtros`, al principio de cada página."""
+    indice = st.session_state.get("_color_index", 0)
+    st.session_state["_color_index"] = indice + 1
+    return CHART_SEQUENCE[indice % len(CHART_SEQUENCE)]
 
 
 def filtro_edicion(df: pd.DataFrame, key: str, reset_keys: list[str] | None = None) -> pd.Series:
@@ -169,13 +168,13 @@ def grafico_barras(
         if data.empty:
             st.info("Sin datos para este filtro.")
             return
-        colores = _colores_para(len(data))
+        color = _siguiente_color()
         if horizontal:
             data = data.iloc[::-1]
-            colores = colores[::-1]
             fig = px.bar(
                 data, x="Porcentaje", y=columna, orientation="h",
-                text="Porcentaje", custom_data=["Cantidad"],
+                color_discrete_sequence=[color], text="Porcentaje",
+                custom_data=["Cantidad"],
             )
             fig.update_layout(yaxis_title=None, xaxis_title="Porcentaje (%)")
             fig.update_xaxes(range=[0, data["Porcentaje"].max() * 1.18])
@@ -188,7 +187,8 @@ def grafico_barras(
         else:
             fig = px.bar(
                 data, x=columna, y="Porcentaje",
-                text="Porcentaje", custom_data=["Cantidad"],
+                color_discrete_sequence=[color], text="Porcentaje",
+                custom_data=["Cantidad"],
             )
             fig.update_layout(xaxis_title=None, yaxis_title="Porcentaje (%)")
             fig.update_yaxes(range=[0, data["Porcentaje"].max() * 1.3])
@@ -198,7 +198,7 @@ def grafico_barras(
                 # disponible para reactivarlo agregando de nuevo el <span> con %{customdata[0]}.
                 "<extra></extra>"
             )
-        fig.update_traces(marker_color=colores, texttemplate="%{text}%", textposition="outside", hovertemplate=hovertemplate)
+        fig.update_traces(texttemplate="%{text}%", textposition="outside", hovertemplate=hovertemplate)
         fig.update_layout(margin=dict(t=25, b=25, l=15, r=15))
         aplicar_tipografia(fig)
         st.plotly_chart(fig, width="stretch")
@@ -252,10 +252,10 @@ def grafico_multiseleccion(
             st.info("Sin datos para este filtro.")
             return
         data = pd.DataFrame(filas).sort_values("Porcentaje", ascending=True)
-        colores = _colores_para(len(data))
         fig = px.bar(
             data, x="Porcentaje", y="Opción", orientation="h",
-            text="Porcentaje", custom_data=["Cantidad"],
+            color_discrete_sequence=[_siguiente_color()], text="Porcentaje",
+            custom_data=["Cantidad"],
         )
         fig.update_layout(yaxis_title=None, xaxis_title="Porcentaje (%)")
         fig.update_xaxes(range=[0, data["Porcentaje"].max() * 1.18])
@@ -265,7 +265,7 @@ def grafico_multiseleccion(
             # disponible para reactivarlo agregando de nuevo el <span> con %{customdata[0]}.
             "<extra></extra>"
         )
-        fig.update_traces(marker_color=colores, texttemplate="%{text}%", textposition="outside", hovertemplate=hovertemplate)
+        fig.update_traces(texttemplate="%{text}%", textposition="outside", hovertemplate=hovertemplate)
         fig.update_layout(margin=dict(t=25, b=25, l=15, r=15))
         aplicar_tipografia(fig)
         st.plotly_chart(fig, width="stretch")
