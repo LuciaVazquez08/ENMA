@@ -40,7 +40,10 @@ def _tabla_ponderada(df, index_col, columns_col, peso_pais, peso_poblacion, etiq
     poblacion = df.groupby(columns_col)[peso_poblacion].sum().reindex(pivot.columns, fill_value=0)
     pivot.loc[etiqueta_poblacion] = poblacion
 
-    orden_final = orden + [etiqueta_poblacion]
+    # Plotly invierte el orden de category_orders en gráficos horizontales (la primera categoría
+    # de la lista termina abajo del todo), por eso la referencia poblacional va primera acá para
+    # terminar arriba del todo en el gráfico.
+    orden_final = [etiqueta_poblacion] + orden
     pivot = pivot.loc[orden_final]
 
     tabla = pivot.div(pivot.sum(axis=1), axis=0).mul(100).round(1)
