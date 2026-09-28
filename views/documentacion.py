@@ -36,6 +36,11 @@ def render():
     with col2:
         grafico_barras(df, "solicitud_asilo_refugio", "Solicitud de asilo, refugio o visado humanitario")
 
+    # En 2020 esta misma variable incluye, además de Sí/No/Prefiero no responder, el detalle de
+    # qué dificultad tuvo (categorías más finas que en 2023, que solo distingue Sí/No/Prefiero no
+    # responder); por eso el gráfico muestra más barras al filtrar por 2020 que por 2023.
+    grafico_barras(df, "dni_tuvo_dificultad", "Tuvo dificultad para tramitar o renovar el DNI", horizontal=True)
+
     grafico_multiseleccion(
         df, DIFICULTADES_DNI,
         "Tipos de dificultades para tramitar o renovar el DNI",
