@@ -44,7 +44,9 @@ def render():
     grafico_multiseleccion(
         df, TIPO_ESTUDIO,
         "Tipo de estudios que cursa actualmente",
-        "Qué % de quienes estudian actualmente cursa cada tipo de estudio (pregunta de selección múltiple: una persona puede cursar más de uno).",
+        "Qué % de quienes estudian actualmente cursa cada tipo de estudio. En la edición 2023 la "
+        "pregunta admite selección múltiple (una persona puede cursar más de un tipo a la vez); "
+        "en 2020 se relevó como selección única (un solo tipo por persona).",
     )
 
     sin_inconvenientes = df["inscripcion_estudio_ninguno"] != True  # noqa: E712
